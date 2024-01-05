@@ -199,6 +199,7 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                           ? widget.nodeBackgroundColor
                           : widget.inActiveNodeColor,
                       border: Border.all(
+                          width: 2,
                           color: node.completed
                               ? widget.activeNodeColor
                               : widget.inActiveNodeColor),
@@ -216,7 +217,7 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                         ? Text(
                             "${nodes.indexOf(node) + 1}",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: widget.activeNodeColor,
                             ),
                           )
                         : null,
