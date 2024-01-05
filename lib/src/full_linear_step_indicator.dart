@@ -150,6 +150,30 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (widget.labels.length > 0) ...[
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < widget.labels.length; i++) ...[
+                    Text(
+                      widget.labels[i],
+                      style: nodes[i].completed
+                          ? widget.activeLabelStyle
+                          : widget.inActiveLabelStyle,
+                    ),
+                    if (widget.labels[i] !=
+                        widget.labels[widget.steps - 1]) ...[
+                      SizedBox(
+                        width: widget.steps > 3
+                            ? context.screenWidth(1 / widget.steps) - 45
+                            : context.screenWidth(1 / widget.steps) - 35,
+                      ),
+                    ],
+                  ],
+                ],
+              ),
+            ],
+            SizedBox(height: 6),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -217,30 +241,6 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                 ],
               ],
             ),
-            SizedBox(height: 6),
-            if (widget.labels.length > 0) ...[
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (int i = 0; i < widget.labels.length; i++) ...[
-                    Text(
-                      widget.labels[i],
-                      style: nodes[i].completed
-                          ? widget.activeLabelStyle
-                          : widget.inActiveLabelStyle,
-                    ),
-                    if (widget.labels[i] !=
-                        widget.labels[widget.steps - 1]) ...[
-                      SizedBox(
-                        width: widget.steps > 3
-                            ? context.screenWidth(1 / widget.steps) - 45
-                            : context.screenWidth(1 / widget.steps) - 35,
-                      ),
-                    ],
-                  ],
-                ],
-              ),
-            ],
           ],
         ),
       ),
