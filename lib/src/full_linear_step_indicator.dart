@@ -142,7 +142,6 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    final borderSide = BorderSide(color: Colors.white, width: 2.5);
     return Material(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
@@ -173,7 +172,7 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                 ],
               ),
             ],
-            SizedBox(height: 6),
+            SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -196,12 +195,6 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                       color: node.completed
                           ? widget.activeNodeColor
                           : widget.inActiveNodeColor,
-                      border: Border(
-                        top: borderSide,
-                        bottom: borderSide,
-                        left: borderSide,
-                        right: borderSide,
-                      ),
                       boxShadow: [
                         BoxShadow(
                           spreadRadius: .5,
