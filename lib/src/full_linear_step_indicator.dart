@@ -52,6 +52,8 @@ class FullLinearStepIndicator extends StatefulWidget {
   ///[completedIcon] color
   final Color iconColor;
 
+  final Color? nodeBackgroundColor;
+
   ///Step indicator's background color
   final Color backgroundColor;
 
@@ -88,6 +90,7 @@ class FullLinearStepIndicator extends StatefulWidget {
     this.lineHeight = kDefaultLineHeight,
     this.shape = BoxShape.circle,
     this.iconColor = kIconColor,
+    this.nodeBackgroundColor,
     this.backgroundColor = kIconColor,
     this.complete,
     this.labels = const <String>[],
@@ -193,8 +196,12 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: node.completed
-                          ? widget.activeNodeColor
+                          ? widget.nodeBackgroundColor
                           : widget.inActiveNodeColor,
+                      border: Border.all(
+                          color: node.completed
+                              ? widget.activeNodeColor
+                              : widget.inActiveNodeColor),
                       boxShadow: [
                         BoxShadow(
                           spreadRadius: .5,
@@ -205,12 +212,14 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                         ),
                       ],
                     ),
-                    child: Text(
-                      "${nodes.indexOf(node) + 1}",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: node.completed
+                        ? Text(
+                            "${nodes.indexOf(node) + 1}",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
                   ),
                   if (node.step != widget.steps - 1)
                     Container(
