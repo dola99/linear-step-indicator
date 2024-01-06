@@ -156,7 +156,7 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
             if (widget.labels.length > 0) ...[
               Container(
                 color: Colors.red,
-                width: 150,
+                width: 70,
                 child: Center(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
