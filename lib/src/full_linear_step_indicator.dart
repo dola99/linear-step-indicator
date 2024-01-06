@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:linear_step_indicator/src/constants.dart';
-import 'extensions.dart';
-import 'node.dart';
+import 'package:linear_step_indicator/src/extensions.dart';
+import 'package:linear_step_indicator/src/node.dart';
 
 class FullLinearStepIndicator extends StatefulWidget {
   ///Controller for tracking page changes.
@@ -72,6 +72,9 @@ class FullLinearStepIndicator extends StatefulWidget {
   ///Textstyle for an inactive label
   final TextStyle? inActiveLabelStyle;
 
+  final double? leftTitlePadding;
+  final double? rightTitlePadding;
+  final Widget? checkedWidget;
   const FullLinearStepIndicator({
     Key? key,
     required this.steps,
@@ -79,6 +82,9 @@ class FullLinearStepIndicator extends StatefulWidget {
     this.activeBorderColor = kActiveColor,
     this.inActiveBorderColor = kInActiveColor,
     this.activeLineColor = kActiveLineColor,
+    this.rightTitlePadding = 45,
+    this.leftTitlePadding = 65,
+    this.checkedWidget,
     this.inActiveLineColor = kInActiveLineColor,
     this.activeNodeColor = kActiveColor,
     this.inActiveNodeColor = kInActiveNodeColor,
@@ -116,31 +122,22 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
     nodes = List<Node>.generate(widget.steps, (index) => Node(step: index));
     lastStep = 0;
 
-    //listen to page changes to track when each step is ideally completed
+    widget.controller.addListener(() async {
+      if (widget.controller.page! > lastStep) {
+        setState(() {
+          nodes[lastStep].completed = true;
+          lastStep = widget.controller.page!.ceil();
+        });
+      }
 
-    widget.controller.addListener(
-      () async {
-        if (widget.controller.page! > lastStep) {
-          setState(
-            () {
-              nodes[lastStep].completed = true;
-              lastStep = widget.controller.page!.ceil();
-            },
-          );
+      if (widget.controller.page! == widget.steps - 1 &&
+          widget.complete != null) {
+        if (await widget.complete!()) {
+          // nodes[widget.steps - 1].completed = true;
+          setState(() {});
         }
-
-        //checks if the controller has hit the max step
-        //and checks [complete] to complete last node (or not)
-
-        if (widget.controller.page! == widget.steps - 1 &&
-            widget.complete != null) {
-          if (await widget.complete!()) {
-            nodes[widget.steps - 1].completed = true;
-            setState(() {});
-          }
-        }
-      },
-    );
+      }
+    });
   }
 
   @override
@@ -151,85 +148,113 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
         color: widget.backgroundColor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (widget.labels.length > 0) ...[
-              Container(
-                color: Colors.red,
-                child: Center(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      for (int i = 0; i < widget.labels.length; i++) ...[
-                        Text(
+            if (widget.labels.isNotEmpty) ...[
+              Padding(
+                padding: EdgeInsets.only(
+                    right: widget.leftTitlePadding!,
+                    left: widget.rightTitlePadding!),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    for (int i = 0; i < widget.labels.length; i++) ...[
+                      Flexible(
+                        flex: 1,
+                        child: Text(
                           widget.labels[i],
-                          style: nodes[i].completed
+                          textAlign: TextAlign.center,
+                          style: (widget.controller.page?.round() ?? 0) >=
+                                  nodes.indexOf(nodes[i])
                               ? widget.activeLabelStyle
-                              : widget.inActiveLabelStyle,
+                              : nodes[i].completed
+                                  ? widget.activeLabelStyle
+                                  : widget.inActiveLabelStyle,
                         ),
-                        if (widget.labels[i] !=
-                            widget.labels[widget.steps - 1]) ...[
-                          SizedBox(
-                            width: widget.steps > 3
-                                ? context.screenWidth(1 / widget.steps) - 45
-                                : context.screenWidth(1 / widget.steps) - 35,
-                          ),
-                        ],
-                      ],
-                    ],
-                  ),
+                      ),
+                    ]
+                  ],
                 ),
               ),
             ],
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 for (var node in nodes) ...[
                   if (nodes.indexOf(node) == 0) ...{
                     Container(
-                      color: node.completed
+                      color: (widget.controller.page?.round() ?? 0) >=
+                              nodes.indexOf(node)
                           ? widget.activeLineColor
-                          : widget.inActiveLineColor,
+                          : node.completed
+                              ? widget.activeLineColor
+                              : widget.inActiveLineColor,
                       height: widget.lineHeight,
                       width: context.screenWidth(1 / widget.steps) * .25,
                     ),
                   },
-                  Container(
-                    alignment: Alignment.center,
-                    height: 38,
-                    width: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: node.completed
-                          ? widget.nodeBackgroundColor
-                          : widget.inActiveNodeColor,
-                      border: Border.all(
+                  AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      alignment: Alignment.center,
+                      height: 28,
+                      width: 28,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (widget.controller.page?.round() ?? 0) >=
+                                nodes.indexOf(node)
+                            ? widget.nodeBackgroundColor
+                            : node.completed
+                                ? widget.nodeBackgroundColor
+                                : widget.inActiveNodeColor,
+                        border: Border.all(
                           width: 2,
-                          color: node.completed
+                          color: (widget.controller.page?.round() ?? 0) >=
+                                  nodes.indexOf(node)
                               ? widget.activeNodeColor
-                              : widget.inActiveNodeColor),
-                      boxShadow: [
-                        BoxShadow(
-                          spreadRadius: .5,
-                          blurRadius: .5,
-                          color: Theme.of(context)
-                              .primaryColorDark
-                              .withOpacity(.4),
+                              : node.completed
+                                  ? widget.activeNodeColor
+                                  : widget.inActiveNodeColor,
                         ),
-                      ],
-                    ),
-                    child: node.completed
-                        ? Text(
-                            "${nodes.indexOf(node) + 1}",
-                            style: TextStyle(
-                              color: widget.activeNodeColor,
-                            ),
-                          )
-                        : null,
-                  ),
+                        boxShadow: [
+                          BoxShadow(
+                            spreadRadius: .5,
+                            blurRadius: .5,
+                            color: Theme.of(context)
+                                .primaryColorDark
+                                .withOpacity(.4),
+                          ),
+                        ],
+                      ),
+                      child: AnimatedBuilder(
+                          animation: widget.controller,
+                          builder: (context, child) {
+                            return AnimatedOpacity(
+                              duration: const Duration(milliseconds: 500),
+                              opacity: node.completed
+                                  ? 1.0
+                                  : (widget.controller.page?.round() ?? 0) ==
+                                          nodes.indexOf(node)
+                                      ? 1.0
+                                      : 0.0,
+                              child: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 500),
+                                child: node.completed
+                                    ? widget.checkedWidget
+                                    : (widget.controller.page?.round() ?? 0) ==
+                                            nodes.indexOf(node)
+                                        ? Text(
+                                            "${nodes.indexOf(node) + 1}",
+                                            key: ValueKey<int>(
+                                                nodes.indexOf(node)),
+                                            style: TextStyle(
+                                              color: widget.activeNodeColor,
+                                            ),
+                                          )
+                                        : null,
+                              ),
+                            );
+                          })),
                   if (node.step != widget.steps - 1)
                     Container(
                       color: node.completed
