@@ -151,9 +151,12 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
         color: widget.backgroundColor,
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (widget.labels.length > 0) ...[
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   for (int i = 0; i < widget.labels.length; i++) ...[
