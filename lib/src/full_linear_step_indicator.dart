@@ -164,12 +164,14 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                         child: Text(
                           widget.labels[i],
                           textAlign: TextAlign.center,
-                          style: (widget.controller.page?.round() ?? 0) >=
-                                  nodes.indexOf(nodes[i])
-                              ? widget.activeLabelStyle
-                              : nodes[i].completed
+                          style: widget.controller.hasClients
+                              ? (widget.controller.page?.round() ?? 0) >=
+                                      nodes.indexOf(nodes[i])
                                   ? widget.activeLabelStyle
-                                  : widget.inActiveLabelStyle,
+                                  : nodes[i].completed
+                                      ? widget.activeLabelStyle
+                                      : widget.inActiveLabelStyle
+                              : widget.inActiveLabelStyle,
                         ),
                       ),
                     ]
@@ -184,12 +186,14 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                 for (var node in nodes) ...[
                   if (nodes.indexOf(node) == 0) ...{
                     Container(
-                      color: (widget.controller.page?.round() ?? 0) >=
-                              nodes.indexOf(node)
-                          ? widget.activeLineColor
-                          : node.completed
+                      color: widget.controller.hasClients
+                          ? (widget.controller.page?.round() ?? 0) >=
+                                  nodes.indexOf(node)
                               ? widget.activeLineColor
-                              : widget.inActiveLineColor,
+                              : node.completed
+                                  ? widget.activeLineColor
+                                  : widget.inActiveLineColor
+                          : widget.inActiveLineColor,
                       height: widget.lineHeight,
                       width: context.screenWidth(1 / widget.steps) * .25,
                     ),
@@ -201,20 +205,24 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                       width: 28,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: (widget.controller.page?.round() ?? 0) >=
-                                nodes.indexOf(node)
-                            ? widget.nodeBackgroundColor
-                            : node.completed
+                        color: widget.controller.hasClients
+                            ? (widget.controller.page?.round() ?? 0) >=
+                                    nodes.indexOf(node)
                                 ? widget.nodeBackgroundColor
-                                : widget.inActiveNodeColor,
+                                : node.completed
+                                    ? widget.nodeBackgroundColor
+                                    : widget.inActiveNodeColor
+                            : widget.inActiveNodeColor,
                         border: Border.all(
                           width: 2,
-                          color: (widget.controller.page?.round() ?? 0) >=
-                                  nodes.indexOf(node)
-                              ? widget.activeNodeColor
-                              : node.completed
+                          color: widget.controller.hasClients
+                              ? (widget.controller.page?.round() ?? 0) >=
+                                      nodes.indexOf(node)
                                   ? widget.activeNodeColor
-                                  : widget.inActiveNodeColor,
+                                  : node.completed
+                                      ? widget.activeNodeColor
+                                      : widget.inActiveNodeColor
+                              : widget.inActiveNodeColor,
                         ),
                         boxShadow: [
                           BoxShadow(
@@ -233,25 +241,38 @@ class _FullLinearStepIndicatorState extends State<FullLinearStepIndicator> {
                               duration: const Duration(milliseconds: 500),
                               opacity: node.completed
                                   ? 1.0
-                                  : (widget.controller.page?.round() ?? 0) ==
-                                          nodes.indexOf(node)
-                                      ? 1.0
-                                      : 0.0,
+                                  : widget.controller.hasClients
+                                      ? (widget.controller.page?.round() ??
+                                                  0) ==
+                                              nodes.indexOf(node)
+                                          ? 1.0
+                                          : 0.0
+                                      : 0,
                               child: AnimatedSwitcher(
                                 duration: const Duration(milliseconds: 500),
                                 child: node.completed
                                     ? widget.checkedWidget
-                                    : (widget.controller.page?.round() ?? 0) ==
-                                            nodes.indexOf(node)
-                                        ? Text(
+                                    : widget.controller.hasClients
+                                        ? (widget.controller.page?.round() ??
+                                                    0) ==
+                                                nodes.indexOf(node)
+                                            ? Text(
+                                                "${nodes.indexOf(node) + 1}",
+                                                key: ValueKey<int>(
+                                                    nodes.indexOf(node)),
+                                                style: TextStyle(
+                                                  color: widget.activeNodeColor,
+                                                ),
+                                              )
+                                            : null
+                                        : Text(
                                             "${nodes.indexOf(node) + 1}",
                                             key: ValueKey<int>(
                                                 nodes.indexOf(node)),
                                             style: TextStyle(
                                               color: widget.activeNodeColor,
                                             ),
-                                          )
-                                        : null,
+                                          ),
                               ),
                             );
                           })),
